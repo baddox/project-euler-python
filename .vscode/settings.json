@@ -1,6 +1,2 @@
 {
-    "python.formatting.provider": "black",
-    "prettier.tabWidth": 4,
-    "editor.detectIndentation": false,
-    "editor.tabSize": 4
 }

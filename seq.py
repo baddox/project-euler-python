@@ -1,6 +1,8 @@
 from itertools import count, islice, takewhile, dropwhile
 import functools
 import math
+from collections import Counter
+import operator
 
 
 def compose(*funcs):
@@ -40,6 +42,7 @@ def primes(_=None):
 def primes_lte(limit):
     sieve = set()
     candidate = 2
+    yield 2
     while True:
         for multiple in range(candidate * 2, limit + 1, candidate):
             sieve.add(multiple)
@@ -55,6 +58,23 @@ def primes_lte(limit):
 
 
 def multiples_of(*divisors):
+    def is_multiple(a, divisor):
+        return a % divisor == 0
+
+    def f(nums=None):
+        if nums is None:
+            nums = count()
+        return filter(
+            lambda a: any(is_multiple(a, divisor) for divisor in divisors), nums
+        )
+
+    return f
+
+
+def divisible_by(*divisors):
+    for divisor in divisors:
+        pfs = prime_factors(divisor)
+
     def is_multiple(a, divisor):
         return a % divisor == 0
 
@@ -151,12 +171,35 @@ def is_prime(a):
 
 
 def prime_factors(a):
-    square_root = math.floor(math.sqrt(a))
-    for prime in primes_lte(square_root):
-        if a % prime == 0:
-            yield prime
+    for candidate in count(2):
+        while a % candidate == 0:
+            yield candidate
+            a = a // candidate
+        if a == 1:
+            break
 
 
 def is_palindrome(a):
     s = str(a)
     return s == s[::-1]
+
+
+def lcm(*nums):
+    factors = {}
+    for num in nums:
+        counts = Counter(prime_factors(num))
+        for factor, multiple in counts.items():
+            if factors.get(factor, 0) < multiple:
+                factors[factor] = multiple
+    return functools.reduce(
+        operator.mul,
+        (factor ** multiple for factor, multiple in factors.items()),
+        1,
+    )
+
+
+def squares(nums=None):
+    if nums is None:
+        nums = count()
+    return (num ** 2 for num in nums)
+
